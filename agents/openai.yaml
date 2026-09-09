@@ -1,0 +1,4 @@
+interface:
+  display_name: "X 收藏夹 → Obsidian"
+  short_description: "将浏览器导出的 X 收藏整理成 Obsidian 收藏库"
+  default_prompt: "使用 $x-bookmarks-to-obsidian 把这份 X 收藏 CSV 整理进我的 Obsidian。"
