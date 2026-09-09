@@ -16,6 +16,11 @@ from pathlib import Path
 
 GENERATOR = "x-bookmarks-to-obsidian"
 
+# 未显式指定 --output-folder 时使用的默认输出文件夹。
+DEFAULT_OUTPUT_FOLDER = "X收藏夹"
+# 历史默认值。若新位置没有收藏库、而旧位置存在托管收藏库，则自动沿用旧位置，避免重复生成。
+LEGACY_OUTPUT_FOLDERS = ["03Resources"]
+
 CATEGORY_RULES = [
     ("X 运营与增长", r"Twitter|推特|X\s*运营|涨粉|回复增长|推文|First Check"),
     ("内容与自媒体", r"内容|小红书|公众号|自媒体|选题|写作|热点|起号|个人IP"),
@@ -289,12 +294,30 @@ def download_avatar(author: dict, avatars_dir: Path, rel_folder: str, enabled: b
         return default, False
 
 
+def resolve_output_folder(vault: Path, name: str) -> str:
+    """用户未显式指定输出文件夹时，决定放在 vault 内的哪个文件夹。
+
+    优先使用 DEFAULT_OUTPUT_FOLDER；若该位置还没有收藏库，而某个历史默认位置下
+    已存在同名托管收藏库，则沿用历史位置，避免为老用户重复生成一整套文件。
+    """
+    if (vault / DEFAULT_OUTPUT_FOLDER / f"{name}.md").exists():
+        return DEFAULT_OUTPUT_FOLDER
+    for legacy in LEGACY_OUTPUT_FOLDERS:
+        if (vault / legacy / f"{name}.md").exists():
+            print(
+                f"[提示] {DEFAULT_OUTPUT_FOLDER}/ 下没有已有的“{name}”，"
+                f"沿用旧位置 {legacy}/，避免重复生成。如要迁移，请显式传入 --output-folder {DEFAULT_OUTPUT_FOLDER}。"
+            )
+            return legacy
+    return DEFAULT_OUTPUT_FOLDER
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--vault", required=True, type=Path)
     parser.add_argument("--name", default="x收藏夹")
-    parser.add_argument("--output-folder", default="03Resources")
+    parser.add_argument("--output-folder", default=None, help=f"vault 内的输出文件夹，默认 {DEFAULT_OUTPUT_FOLDER}")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--update", action="store_true")
     parser.add_argument("--no-download-avatars", action="store_true")
@@ -307,6 +330,8 @@ def main() -> int:
         raise ValueError(f"目标不是现有 Obsidian vault：{vault}")
     if "/" in args.name or "\\" in args.name:
         raise ValueError("--name 不能包含路径分隔符。")
+    if args.output_folder is None:
+        args.output_folder = resolve_output_folder(vault, args.name)
 
     items, report = read_items(csv_path)
     authors_map: dict[str, dict] = {}
