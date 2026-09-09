@@ -1,0 +1,18 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# 私人收藏源文件与本地导出结果
+*.csv
+*.xlsx
+private/
+output/
+outputs/
+
+# 本地打包文件
+*.zip
+
+# 未脱敏的截图不得进入公开仓库
+assets/screenshots/*-original.png
+assets/screenshots/author-cards.png
+assets/screenshots/bookmark-base.png
