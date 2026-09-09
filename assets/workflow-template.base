@@ -1,0 +1,93 @@
+# generated_by: x-bookmarks-to-obsidian
+filters:
+  and:
+    - 'file.inFolder("__RECORDS_FOLDER__")'
+    - 'file.hasTag("x收藏")'
+formulas:
+  标题链接: 'link(url, title)'
+  等待天数: 'if(imported_at, (today() - date(imported_at)).days, "")'
+  提醒状态: 'if(review_on, if(date(review_on) <= today(), "🔔 到期", date(review_on).format("MM-DD")), "")'
+properties:
+  formula.标题链接: {displayName: "收藏内容"}
+  note.status: {displayName: "处理状态"}
+  note.priority: {displayName: "优先级"}
+  note.category: {displayName: "能做什么"}
+  note.author: {displayName: "作者"}
+  note.imported_at: {displayName: "导入日期"}
+  formula.等待天数: {displayName: "等待天数"}
+  note.next_action: {displayName: "下一步行动"}
+  note.review_on: {displayName: "下次提醒"}
+  formula.提醒状态: {displayName: "提醒"}
+  note.practice_note: {displayName: "学习/实践笔记"}
+  note.outcome: {displayName: "结果"}
+views:
+  - type: table
+    name: "昨日与今日未读"
+    limit: 20
+    filters:
+      and:
+        - 'status == "未读"'
+        - 'date(imported_at) >= today() - "1d"'
+    order: [formula.标题链接, status, priority, category, author, imported_at]
+    sort:
+      - property: priority
+        direction: DESC
+      - property: imported_at
+        direction: DESC
+  - type: table
+    name: "历史未读"
+    limit: 20
+    filters:
+      and:
+        - 'status == "未读"'
+        - 'date(imported_at) < today() - "1d"'
+    order: [formula.标题链接, status, priority, category, formula.等待天数, author]
+    sort:
+      - property: priority
+        direction: DESC
+      - property: imported_at
+        direction: ASC
+  - type: table
+    name: "重点学习"
+    filters: 'status == "待学习"'
+    order: [formula.标题链接, priority, category, next_action, review_on, formula.提醒状态, practice_note]
+    sort:
+      - property: priority
+        direction: DESC
+      - property: review_on
+        direction: ASC
+  - type: table
+    name: "待实践"
+    filters: 'status == "待实践"'
+    order: [formula.标题链接, priority, next_action, review_on, formula.提醒状态, practice_note, author]
+    sort:
+      - property: priority
+        direction: DESC
+      - property: review_on
+        direction: ASC
+  - type: table
+    name: "重点实践"
+    filters:
+      and:
+        - 'status == "待实践"'
+        - or:
+            - 'priority == "重要"'
+            - 'priority == "核心"'
+    order: [formula.标题链接, priority, next_action, review_on, formula.提醒状态, practice_note]
+  - type: table
+    name: "实践中"
+    filters: 'status == "实践中"'
+    order: [formula.标题链接, priority, next_action, practice_note, review_on, formula.提醒状态, outcome]
+  - type: table
+    name: "今日提醒"
+    filters:
+      and:
+        - 'review_on != ""'
+        - 'date(review_on) <= today()'
+        - 'status != "已完成"'
+        - 'status != "已归档"'
+    order: [formula.提醒状态, formula.标题链接, status, priority, next_action, review_on, practice_note]
+  - type: table
+    name: "已完成"
+    filters: 'status == "已完成"'
+    order: [formula.标题链接, outcome, practice_note, reviewed_at, category, author]
