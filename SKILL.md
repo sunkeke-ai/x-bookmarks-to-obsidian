@@ -10,12 +10,15 @@ description: 将 Chrome 插件导出的 X/Twitter 收藏或书签 CSV 去重、�
 ## 路由
 
 - 用户已经提供 CSV：直接检查输入、预览，然后构建。
-- 用户尚未导出：读取 [references/export-guide.md](references/export-guide.md)，指导其用当前 Chrome 的收藏导出插件生成 CSV。若用户明确要求由 Codex 操作浏览器，再使用可用的 Chrome 控制能力；只读取收藏，不点赞、转发、关注或发布。
+- 用户尚未导出：读取 [references/export-guide.md](references/export-guide.md)，指导其用当前 Chrome 的收藏导出插件生成 CSV。若用户明确要求由 Agent 操作浏览器，再使用可用的 Chrome 控制能力；只读取收藏，不点赞、转发、关注或发布。
 - 用户要求按指定账号抓热门推文，而不是整理自己的收藏：改用 `$x-to-obsidian`，不要使用本 Skill。
 
 ## 构建流程
 
-1. 确认 CSV 路径和目标 Obsidian vault。目标必须是现有 vault（包含 `.obsidian`）。未指定库内位置时使用 `03Resources`，名称使用 `x收藏夹`。
+1. 确认 CSV 路径和目标 Obsidian vault。目标必须是现有 vault（包含 `.obsidian`）。名称默认使用 `x收藏夹`，库内位置默认使用 `X收藏夹`；用户另行指定时以用户为准。
+   - 不要假定用户 vault 里有 `03Resources` 之类的个人目录结构。未指定位置时不传 `--output-folder`，由脚本自行决定。
+   - 脚本会在新位置没有收藏库、而 `03Resources` 下存在同名托管收藏库时自动沿用旧位置，并在输出中给出提示。看到该提示时照常继续，不要重复生成一套新的。
+   - 只有用户明确要求迁移位置，才显式传入 `--output-folder`。
 2. 先执行预览，不写文件：
 
 ```bash
